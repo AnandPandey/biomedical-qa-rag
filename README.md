@@ -66,10 +66,10 @@ Roles are proposed and will be confirmed by the group.
 
 | Member | Area | GitHub |
 |---|---|---|
-| Member 1 (TBD) | PubMedQA data pipeline, biomedical transformer classifier | TBD |
-| Member 2 (TBD) | Closed-book LLM baseline, shared LLM client | TBD |
-| Member 3 (TBD) | PubMed retrieval and RAG pipeline | TBD |
-| Member 4 (TBD) | Evaluation, unsupported-claim analysis, comparison, report coordination | TBD |
+| Member 1 (Anand Kumar pandey) | PubMedQA data pipeline, biomedical transformer classifier | https://github.com/AnandPandey |
+| Member 2 (Hari Singh) | Closed-book LLM baseline, shared LLM client | https://github.com/harisingh294 |
+| Member 3 (Ayush Yadav) | PubMed retrieval and RAG pipeline | https://github.com/AyushYadav-rgb477 |
+| Member 4 (Guman Singh Rajput) | Evaluation, unsupported-claim analysis, comparison, report coordination | https://github.com/Guman-Singh-Rajpoot |
 
 ## Contributing
 
