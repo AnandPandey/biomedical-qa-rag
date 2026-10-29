@@ -1,0 +1,43 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Data: never commit raw or processed datasets ---
+# Only the data README and (later) the split ID lists are tracked.
+data/*
+!data/README.md
+!data/splits/
+
+# --- Large or regenerable artefacts ---
+outputs/
+*.ckpt
+*.pt
+*.bin
+*.safetensors
+*.faiss
+*.index
+
+# --- Notebooks / editors / OS ---
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

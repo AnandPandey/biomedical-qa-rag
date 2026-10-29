@@ -1,0 +1,27 @@
+# CODEOWNERS: GitHub automatically requests a review from the owner of the files a PR touches.
+#
+# PLACEHOLDERS: every rule below is commented out until the team confirms names and roles.
+# To activate, replace <member-N-github-handle> with the real GitHub username (keep the @),
+# uncomment the line, and open a PR. Later rules override earlier ones.
+
+# Default reviewer for anything not matched below
+# *                         @<member-4-github-handle>
+
+# Member 1: data pipeline and classifier
+# /src/bmqa/data/           @<member-1-github-handle>
+# /src/bmqa/classifier/     @<member-1-github-handle>
+
+# Member 2: LLM client and closed-book baseline
+# /src/bmqa/llm/            @<member-2-github-handle>
+
+# Member 3: retrieval and RAG
+# /src/bmqa/retrieval/      @<member-3-github-handle>
+# /src/bmqa/rag/            @<member-3-github-handle>
+
+# Member 4: evaluation and report
+# /src/bmqa/eval/           @<member-4-github-handle>
+# /report/                  @<member-4-github-handle>
+
+# Shared contract: needs review from the whole team
+# /docs/interfaces.md       @<member-1-github-handle> @<member-2-github-handle> @<member-3-github-handle> @<member-4-github-handle>
+# /src/bmqa/schema.py       @<member-1-github-handle> @<member-2-github-handle> @<member-3-github-handle> @<member-4-github-handle>
