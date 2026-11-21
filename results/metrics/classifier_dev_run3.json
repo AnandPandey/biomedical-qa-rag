@@ -1,0 +1,54 @@
+{
+  "system": "classifier",
+  "split": "dev",
+  "run": 3,
+  "prediction_file": "results/predictions/classifier/dev_run3.jsonl",
+  "n": 100,
+  "accuracy": 0.54,
+  "macro_f1": 0.32592592592592595,
+  "per_label": {
+    "yes": {
+      "precision": 0.575,
+      "recall": 0.8363636363636363,
+      "f1": 0.6814814814814815,
+      "support": 55
+    },
+    "no": {
+      "precision": 0.4,
+      "recall": 0.23529411764705882,
+      "f1": 0.29629629629629634,
+      "support": 34
+    },
+    "maybe": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 11
+    }
+  },
+  "confusion_matrix": {
+    "labels": [
+      "yes",
+      "no",
+      "maybe"
+    ],
+    "rows_gold_cols_pred": [
+      [
+        46,
+        9,
+        0
+      ],
+      [
+        26,
+        8,
+        0
+      ],
+      [
+        8,
+        3,
+        0
+      ]
+    ]
+  },
+  "parse_failures": 0
+}

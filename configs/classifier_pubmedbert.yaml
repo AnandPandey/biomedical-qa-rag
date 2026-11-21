@@ -1,0 +1,33 @@
+# PubMedBERT (published as BiomedBERT) fine-tuned for yes/no/maybe classification.
+# The best epoch per seed is chosen on dev macro-F1, so dev scores are optimistic.
+# Any change to a value here changes the config hash stored in every prediction.
+
+# system: name written into each prediction and used for the output folder
+# (results/predictions/classifier/).
+system: classifier
+# model_name: the pretrained Hugging Face model to start from. It was pretrained on PubMed
+# abstracts and full-text articles, so it already knows biomedical vocabulary.
+model_name: microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext
+# max_length: maximum tokens per (question, contexts) pair. 512 is the most a BERT model
+# accepts; longer contexts are cut, the question is always kept whole.
+max_length: 512
+# learning_rate: size of each weight update. 2e-5 is a standard small value for fine-tuning
+# BERT models; larger values can wreck the pretrained knowledge.
+learning_rate: 2.0e-5
+# batch_size: examples per training step. 8 fits 512-token inputs into a typical
+# Colab GPU's memory.
+batch_size: 8
+# epochs: full passes over the training data. Every epoch is scored on dev and the best one
+# is kept, so 10 gives room to improve without needing to guess the right number in advance.
+epochs: 10
+# warmup_ratio: the first 10% of steps raise the learning rate gradually from 0,
+# which keeps the start of training stable.
+warmup_ratio: 0.1
+# weight_decay: small penalty on large weights (used by AdamW) to reduce overfitting
+# on the small training set.
+weight_decay: 0.01
+# seeds: five random seeds, one training run each (seed 0 is run 1, and so on). Several
+# runs show how much results vary by chance, which matters with so little data.
+seeds: [0, 1, 2, 3, 4]
+# labels: the three answer classes, in the same order as LABELS in src/bmqa/schema.py.
+labels: [yes, no, maybe]

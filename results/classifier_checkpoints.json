@@ -1,0 +1,42 @@
+[
+  {
+    "seed": 0,
+    "run": 1,
+    "best_epoch": 9,
+    "dev_macro_f1": 0.4406511774932828,
+    "checkpoint": "seed0",
+    "model_safetensors_sha256": "d32b655afe3f79575d3798e6a2568e05c1b6d4cdcec187cd9e2892d2fd244e68"
+  },
+  {
+    "seed": 1,
+    "run": 2,
+    "best_epoch": 9,
+    "dev_macro_f1": 0.4193548387096773,
+    "checkpoint": "seed1",
+    "model_safetensors_sha256": "69c55c212627881df292e61ee1c87887dfe2363a1be8c8b4b10d9d63d8d742f3"
+  },
+  {
+    "seed": 2,
+    "run": 3,
+    "best_epoch": 9,
+    "dev_macro_f1": 0.32592592592592595,
+    "checkpoint": "seed2",
+    "model_safetensors_sha256": "ad144212bc00313612422ef3708e02326488afded8020fc61475016aeb7541d8"
+  },
+  {
+    "seed": 3,
+    "run": 4,
+    "best_epoch": 2,
+    "dev_macro_f1": 0.365979381443299,
+    "checkpoint": "seed3",
+    "model_safetensors_sha256": "73016adf9edf46c17cf1341ff417415c00f71ea0761d1c81022a27243f7a3729"
+  },
+  {
+    "seed": 4,
+    "run": 5,
+    "best_epoch": 10,
+    "dev_macro_f1": 0.423963133640553,
+    "checkpoint": "seed4",
+    "model_safetensors_sha256": "1d82c3f32229033fe897241a96ff388db4911928e7fcfa0fca38a064f6a057af"
+  }
+]
