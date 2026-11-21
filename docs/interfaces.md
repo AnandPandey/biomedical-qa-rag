@@ -47,7 +47,7 @@ Produced by the retrieval component (Member 3).
 
 ## 3. Retriever
 
-```python
+```
 retrieve(query: str, k: int) -> list[Hit]
 Hit = {"doc_id": str, "score": float, "rank": int}   # rank starts at 1, best first
 ```
@@ -56,7 +56,7 @@ Returns at most `k` hits, sorted by rank. Scores are only comparable within one 
 
 ## 4. LLM client
 
-```python
+```
 generate(prompt: str, *, max_tokens: int) -> LLMResponse
 LLMResponse = {
     "text": str,           # the model's reply
@@ -94,12 +94,44 @@ Written by **every** system, including the classifier, so the evaluator treats t
 | `seed` | int \| null | Training seed (classifier); `null` if not applicable |
 | `run` | int | Repeat number, starting at 1 |
 
-## 6. Evaluator (planned)
+**Parse failures.** A row whose `raw_output` starts with `PARSE_FAILURE:` is scored as
+incorrect whatever its `prediction` field says (the field still holds a valid placeholder label),
+and is counted in the metrics as a parse failure.
+
+## 6. Evaluator (implemented in Phase 1)
 
 ```
-python -m bmqa.eval --pred <predictions.jsonl> --split <dev|test>
+python -m bmqa.eval --pred <predictions.jsonl> --split <dev|test> [--allow-test]
 ```
 
-Writes `results/metrics/{system}_{split}_run{n}.json` with accuracy, macro-F1, per-class
-precision/recall/F1, the confusion matrix and 95% bootstrap confidence intervals. The evaluator
-depends only on the prediction format above, never on how a system works internally.
+Writes `results/metrics/{system}_{split}_run{n}.json` with `n`, `accuracy`, `macro_f1`,
+per-label precision/recall/F1/support, the confusion matrix (rows gold, columns predicted, label
+order yes/no/maybe) and `parse_failures`. The predicted IDs must be exactly the split's IDs.
+Macro-F1 matches scikit-learn's `f1_score(average="macro")` used by the official PubMedQA
+script. Confidence intervals and significance tests are added in Phase 4. The evaluator depends
+only on the prediction format above, never on how a system works internally.
+
+## 7. Python helpers (Phase 1)
+
+| Function | Module | Purpose |
+|---|---|---|
+| `load_split(split, allow_test=False) -> list[Example]` | `bmqa.data.pubmedqa` | Load a split; `PermissionError` for `test` without `allow_test=True` |
+| `gold_labels(split, allow_test=False) -> dict[str, str]` | `bmqa.data.pubmedqa` | Example id -> gold label |
+| `read_jsonl`, `write_jsonl` | `bmqa.io` | JSON Lines files |
+| `write_predictions`, `load_predictions` | `bmqa.io` | Prediction files (validated on load) |
+| `load_config(path) -> dict`, `config_hash(cfg) -> str` | `bmqa.config` | YAML configs; 12-character SHA-256 of the canonical JSON |
+| `compute_metrics(gold, predictions) -> dict` | `bmqa.eval.metrics` | Metrics used by the evaluator |
+| `accuracy`, `macro_f1`, `per_label`, `confusion_matrix` | `bmqa.eval.metrics` | Metrics on label lists |
+
+## 8. Commands (Phase 1)
+
+| Command | Output |
+|---|---|
+| `python -m bmqa.data.download` | `data/raw/` (checksums verified) |
+| `python -m bmqa.data.splits` | `data/splits/*_ids.txt` (committed, frozen), `data/processed/*.jsonl` |
+| `python -m bmqa.baselines --split dev` | `results/predictions/majority/dev_run1.jsonl` |
+| `python -m bmqa.classifier.train --config configs/classifier_pubmedbert.yaml` | checkpoints in `outputs/classifier/`, dev predictions, `results/classifier_checkpoints.json` |
+| `python -m bmqa.classifier.predict --checkpoint DIR --split dev --run N --seed S` | `results/predictions/classifier/{split}_run{N}.jsonl` |
+
+Every command that can load data has an `--allow-test` flag, off by default. Only the frozen
+Phase 4 test run uses it.

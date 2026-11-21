@@ -6,11 +6,17 @@ in the report rather than quietly re-running.
 
 ## Data and splits
 
-- We use **PQA-L**, the 1,000 expert-labelled PubMedQA questions.
-- **Test:** the official 500-question PubMedQA test set, identified by the official PMID list.
-- **Train / dev:** the remaining 500 questions, split 400 / 100, stratified by label, with a
-  fixed seed. The ID lists are committed under `data/splits/` so every member uses identical
-  splits. Splits are never regenerated once committed.
+- We use **PQA-L**, the 1,000 expert-labelled PubMedQA questions, downloaded from
+  `github.com/pubmedqa/pubmedqa` at commit `1cbae8e92f72f20c8d3747cbb3bf5bc53554d997` with
+  SHA-256 checks (see `data/README.md`).
+- **Test:** the official 500-question PubMedQA test set, identified by the official PMID list
+  `data/test_ground_truth.json` (276 yes, 169 no, 55 maybe).
+- **Train / dev:** the remaining 500 questions, split 400 / 100, stratified by label: for each
+  label, the PMIDs are sorted, shuffled with `random.Random(42)` (one generator, labels in the
+  order yes, no, maybe) and `round(0.2 * n)` go to dev. Result: train 221 / 135 / 44, dev
+  55 / 34 / 11 (yes / no / maybe). The ID lists are committed under `data/splits/` so every member
+  uses identical splits. Splits are never regenerated once committed: `python -m bmqa.data.splits`
+  refuses to run if a fresh computation differs from the committed lists.
 - PQA-A (artificial) and PQA-U (unlabelled) are used only as the retrieval corpus and, optionally,
   as extra classifier training data. They are never used for evaluation.
 
@@ -25,8 +31,9 @@ in the report rather than quietly re-running.
    procedure.
 4. **No changes after seeing test results.** If a bug is found after the test run, fix it, re-run
    *all* affected systems, and report both the original and corrected numbers.
-5. Code that loads data must require an explicit opt-in to load the test split, so it cannot be
-   used by accident. (To be implemented with the data loader in Phase 2.)
+5. Code that loads data requires an explicit opt-in to load the test split, so it cannot be used
+   by accident: `bmqa.data.pubmedqa.load_split("test")` raises `PermissionError` unless
+   `allow_test=True`, and every command has an `--allow-test` flag that is off by default.
 
 ## Model inputs and leakage
 
@@ -51,7 +58,8 @@ in the report rather than quietly re-running.
 - Always report the majority-class baseline alongside model results.
 - Compare systems with a paired test (McNemar or paired bootstrap) on the same test items.
   Differences inside the confidence interval are reported as inconclusive, not as wins.
-- Classifier: report mean ± std over several training seeds.
+- Classifier: report mean ± std over several training seeds. Dev scores of the classifier are
+  optimistic, because dev was used to choose the best epoch.
 - LLM systems: outputs are not guaranteed to be deterministic, so each test condition is run
   3 times; report mean ± std. All raw outputs are cached and kept.
 - Every number in the report must be reproducible from a committed config with a documented

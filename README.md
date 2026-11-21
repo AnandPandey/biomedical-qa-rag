@@ -7,10 +7,20 @@ A four-member university Deep Learning semester project (private repository
 abstracts make a large language model's answers more accurate and better supported by evidence
 than answering from memory alone? How do both compare with a fine-tuned biomedical classifier?
 
-> **Status:** project skeleton, shared interfaces and the experiment protocol are in place.
-> The data pipeline, models and experiments are built phase by phase (see
-> [Development plan](#development-plan)); no dataset has been downloaded, no model trained and
-> no result produced yet. This section is updated as each phase is merged.
+> **Status:** Phase 1 (data pipeline, scorer, majority baseline and PubMedBERT classifier) is
+> implemented, with development-set results only; the test set is used once, in Phase 4. The
+> LLM, retrieval and evaluation phases follow (see [Development plan](#development-plan)).
+> This section is updated as each phase is merged.
+
+### Results so far (development set, 100 questions)
+
+| System | Accuracy | Macro-F1 |
+|---|---|---|
+| Majority | 0.550 | 0.237 |
+| PubMedBERT classifier (mean ± std over 5 seeds) | 0.576 ± 0.049 | 0.395 ± 0.048 |
+
+The classifier's dev scores are optimistic because dev was used to pick the best epoch. It
+almost never predicts "maybe". See `report/sections/01-data-and-classifier.md`.
 
 ## Team
 
@@ -78,8 +88,7 @@ Phase 1 (Anand) -> merge -> Phase 2 (Hari) -> merge -> Phase 3 (Ayush) -> merge
 
 ## Setup
 
-Requires Python 3.11 or 3.12. The skeleton needs only the development tools (no PyTorch, no
-GPU, no API key).
+Requires Python 3.11 or 3.12. The development tools need no PyTorch, no GPU and no API key.
 
 ```bash
 python -m venv .venv
@@ -87,6 +96,12 @@ python -m venv .venv
 # macOS / Linux:         source .venv/bin/activate
 python -m pip install -e ".[dev]"
 ```
+
+Optional extras, installed only when needed (CI installs only `dev`):
+
+| Extra | Needed for |
+|---|---|
+| `classifier` | Training or running the PubMedBERT classifier (PyTorch, Transformers) |
 
 Run the same checks as CI:
 
@@ -96,18 +111,35 @@ ruff format --check .
 pytest
 ```
 
+## Reproducing Phase 1 (development set)
+
+```bash
+python -m bmqa.data.download          # PQA-L at a pinned commit, checksums verified
+python -m bmqa.data.splits            # reproduces data/splits/, writes data/processed/
+python -m bmqa.baselines --split dev
+python -m bmqa.eval --pred results/predictions/majority/dev_run1.jsonl --split dev
+```
+
+Classifier training needs a GPU; see [docs/colab.md](docs/colab.md):
+
+```bash
+python -m pip install -e ".[classifier]"
+python -m bmqa.classifier.train --config configs/classifier_pubmedbert.yaml
+python -m bmqa.eval --pred results/predictions/classifier/dev_run1.jsonl --split dev
+```
+
 ## Repository layout
 
 ```
 .github/        CI workflow, PR template, CODEOWNERS
-data/           local datasets (gitignored); see data/README.md
-docs/           shared interfaces and experiment protocol
-src/bmqa/       the Python package (shared records and interfaces so far)
+configs/        experiment configs (one YAML file per system)
+data/           local datasets (gitignored) and committed split ID lists; see data/README.md
+docs/           shared interfaces, experiment protocol, Colab guide
+report/         report sections
+results/        committed predictions and metrics (development set only until Phase 4)
+src/bmqa/       the Python package
 tests/          automated tests (run in CI, need no data or credentials)
 ```
-
-Further folders (`configs/`, `results/`, `report/`) are added by the phase that first needs
-them.
 
 ## Contributing
 
