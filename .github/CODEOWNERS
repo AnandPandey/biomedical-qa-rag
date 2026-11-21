@@ -16,11 +16,17 @@
 /src/bmqa/retrieval/        @AyushYadav-rgb477
 /src/bmqa/rag/              @AyushYadav-rgb477
 
-# Member 4: evaluation and report (the basic scorer below stays with Member 1)
+# Member 4: evaluation and the final report (the basic scorer below stays with Member 1)
 /src/bmqa/eval/             @Guman-Singh-Rajpoot
 /src/bmqa/eval/metrics.py   @AnandPandey
 /src/bmqa/eval/__main__.py  @AnandPandey
-/report/                    @Guman-Singh-Rajpoot
+
+# Report: Member 4 coordinates it; each member owns the section they write.
+# The section rules come after the folder rule, so they override it.
+/report/                                        @Guman-Singh-Rajpoot
+/report/sections/01-data-and-classifier.md      @AnandPandey
+/report/sections/02-llm-baselines.md            @harisingh294
+/report/sections/03-retrieval-and-rag.md        @AyushYadav-rgb477
 
 # Shared contract: needs review from the whole team
 /docs/interfaces.md         @AnandPandey @harisingh294 @AyushYadav-rgb477 @Guman-Singh-Rajpoot
