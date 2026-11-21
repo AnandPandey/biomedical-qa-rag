@@ -1,27 +1,33 @@
 # CODEOWNERS: GitHub automatically requests a review from the owner of the files a PR touches.
-#
-# PLACEHOLDERS: every rule below is commented out until the team confirms names and roles.
-# To activate, replace <member-N-github-handle> with the real GitHub username (keep the @),
-# uncomment the line, and open a PR. Later rules override earlier ones.
+# Later rules override earlier ones. Branch protection is not available on this private
+# repository, so the "one approval before merge" rule is a team agreement (CONTRIBUTING.md).
 
-# Default reviewer for anything not matched below
-# *                         @<member-4-github-handle>
+# No default owner: files not listed below get the reviewer named in the phase assignment.
 
-# Member 1: data pipeline and classifier
-# /src/bmqa/data/           @<member-1-github-handle>
-# /src/bmqa/classifier/     @<member-1-github-handle>
+# Member 1: data pipeline, classifier, basic scorer
+/src/bmqa/data/             @AnandPandey
+/src/bmqa/classifier/       @AnandPandey
+/src/bmqa/baselines.py      @AnandPandey
 
 # Member 2: LLM client and closed-book baseline
-# /src/bmqa/llm/            @<member-2-github-handle>
+/src/bmqa/llm/              @harisingh294
 
 # Member 3: retrieval and RAG
-# /src/bmqa/retrieval/      @<member-3-github-handle>
-# /src/bmqa/rag/            @<member-3-github-handle>
+/src/bmqa/retrieval/        @AyushYadav-rgb477
+/src/bmqa/rag/              @AyushYadav-rgb477
 
-# Member 4: evaluation and report
-# /src/bmqa/eval/           @<member-4-github-handle>
-# /report/                  @<member-4-github-handle>
+# Member 4: evaluation and the final report (the basic scorer below stays with Member 1)
+/src/bmqa/eval/             @Guman-Singh-Rajpoot
+/src/bmqa/eval/metrics.py   @AnandPandey
+/src/bmqa/eval/__main__.py  @AnandPandey
+
+# Report: Member 4 coordinates it; each member owns the section they write.
+# The section rules come after the folder rule, so they override it.
+/report/                                        @Guman-Singh-Rajpoot
+/report/sections/01-data-and-classifier.md      @AnandPandey
+/report/sections/02-llm-baselines.md            @harisingh294
+/report/sections/03-retrieval-and-rag.md        @AyushYadav-rgb477
 
 # Shared contract: needs review from the whole team
-# /docs/interfaces.md       @<member-1-github-handle> @<member-2-github-handle> @<member-3-github-handle> @<member-4-github-handle>
-# /src/bmqa/schema.py       @<member-1-github-handle> @<member-2-github-handle> @<member-3-github-handle> @<member-4-github-handle>
+/docs/interfaces.md         @AnandPandey @harisingh294 @AyushYadav-rgb477 @Guman-Singh-Rajpoot
+/src/bmqa/schema.py         @AnandPandey @harisingh294 @AyushYadav-rgb477 @Guman-Singh-Rajpoot
