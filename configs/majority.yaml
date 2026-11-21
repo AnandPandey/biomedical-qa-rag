@@ -1,0 +1,5 @@
+# Majority-class baseline: predicts the most frequent training label for every question.
+# The baseline has no model or training settings, so the system name is its only key.
+# system: the name written into every prediction and used for the output folder
+# (results/predictions/majority/). Changing it also changes the config hash.
+system: majority
