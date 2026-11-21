@@ -1,0 +1,68 @@
+{
+  "90000001": {
+    "QUESTION": "Synthetic question 1: does treatment A reduce symptom B?",
+    "CONTEXTS": ["Synthetic background 1.", "Synthetic results 1: symptom B fell."],
+    "LABELS": ["BACKGROUND", "RESULTS"],
+    "MESHES": ["Synthetic"],
+    "YEAR": "2000",
+    "reasoning_required_pred": "yes",
+    "reasoning_free_pred": "yes",
+    "final_decision": "yes",
+    "LONG_ANSWER": "SYNTHETIC-CONCLUSION-1: treatment A reduces symptom B."
+  },
+  "90000002": {
+    "QUESTION": "Synthetic question 2: is marker C associated with outcome D?",
+    "CONTEXTS": ["Synthetic background 2.", "Synthetic results 2: strong association."],
+    "LABELS": ["BACKGROUND", "RESULTS"],
+    "MESHES": ["Synthetic"],
+    "YEAR": "2001",
+    "reasoning_required_pred": "yes",
+    "reasoning_free_pred": "yes",
+    "final_decision": "yes",
+    "LONG_ANSWER": "SYNTHETIC-CONCLUSION-2: marker C is associated with outcome D."
+  },
+  "90000003": {
+    "QUESTION": "Synthetic question 3: does exposure E cause disease F?",
+    "CONTEXTS": ["Synthetic background 3.", "Synthetic results 3: no difference."],
+    "LABELS": ["BACKGROUND", "RESULTS"],
+    "MESHES": ["Synthetic"],
+    "YEAR": "2002",
+    "reasoning_required_pred": "no",
+    "reasoning_free_pred": "no",
+    "final_decision": "no",
+    "LONG_ANSWER": "SYNTHETIC-CONCLUSION-3: exposure E does not cause disease F."
+  },
+  "90000004": {
+    "QUESTION": "Synthetic question 4: is drug G better than drug H?",
+    "CONTEXTS": ["Synthetic background 4.", "Synthetic results 4: equivalent."],
+    "LABELS": ["BACKGROUND", "RESULTS"],
+    "MESHES": ["Synthetic"],
+    "YEAR": "2003",
+    "reasoning_required_pred": "no",
+    "reasoning_free_pred": "no",
+    "final_decision": "no",
+    "LONG_ANSWER": "SYNTHETIC-CONCLUSION-4: drug G is not better than drug H."
+  },
+  "90000005": {
+    "QUESTION": "Synthetic question 5: should screening I be offered?",
+    "CONTEXTS": ["Synthetic background 5.", "Synthetic results 5: mixed evidence."],
+    "LABELS": ["BACKGROUND", "RESULTS"],
+    "MESHES": ["Synthetic"],
+    "YEAR": "2004",
+    "reasoning_required_pred": "maybe",
+    "reasoning_free_pred": "maybe",
+    "final_decision": "maybe",
+    "LONG_ANSWER": "SYNTHETIC-CONCLUSION-5: screening I may be useful."
+  },
+  "90000006": {
+    "QUESTION": "Synthetic question 6: does diet J affect weight K?",
+    "CONTEXTS": ["Synthetic background 6.", "Synthetic results 6: unclear effect."],
+    "LABELS": ["BACKGROUND", "RESULTS"],
+    "MESHES": ["Synthetic"],
+    "YEAR": "2005",
+    "reasoning_required_pred": "maybe",
+    "reasoning_free_pred": "maybe",
+    "final_decision": "maybe",
+    "LONG_ANSWER": "SYNTHETIC-CONCLUSION-6: diet J may affect weight K."
+  }
+}
