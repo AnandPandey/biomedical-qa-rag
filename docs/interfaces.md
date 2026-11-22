@@ -146,9 +146,9 @@ Phase 4 test run uses it.
 ```python
 from bmqa.llm.client import make_client, FakeLLMClient
 
-client = make_client(llm_cfg, run=1)                # real client chosen by llm_cfg["provider"]
+client = make_client(llm_cfg, run=1)  # real client chosen by llm_cfg["provider"]
 client = make_client(llm_cfg, run=1, dry_run=True)  # FakeLLMClient: no GPU, key or network
-client = FakeLLMClient()                            # same, created directly (tests)
+client = FakeLLMClient()  # same, created directly (tests)
 ```
 
 `llm_cfg` is the `llm:` block of a config (`configs/closed_book.yaml`). Phase 3 and 4 configs must
