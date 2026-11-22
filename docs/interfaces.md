@@ -68,12 +68,15 @@ LLMResponse = {
 ```
 
 - The model is fixed when the client is created, not per call, so a run cannot silently mix models.
-- Every real response is cached on disk, keyed by a hash of (model, prompt, max_tokens), so
-  re-running an experiment costs nothing and reproduces the same text.
-- A fake client with the same interface is used in tests; tests never call a real API.
-- Provider and model are not decided yet. Sampling parameters such as `temperature` are not part
-  of the interface (some current APIs reject them); run-to-run variation is measured with repeated
-  runs instead (see the protocol).
+  Clients also expose `model` and `last_stop_reason` attributes.
+- Every real response is cached on disk under `outputs/llm_cache/`; see "Cache key" in section 9.
+  Re-running the same run costs nothing and reproduces the same text.
+- `FakeLLMClient` has the same interface and is used in tests and `--dry-run`; tests never call a
+  real API.
+- Provider and model are set in the `llm` block of the configs. Phase 2 uses the open-weights
+  `Qwen/Qwen2.5-7B-Instruct` (provider `qwen`); an Anthropic client (provider `anthropic`) also
+  exists but is unused. Sampling parameters such as `temperature` are not part of the interface;
+  run-to-run variation is measured with repeated runs instead (see the protocol).
 
 ## 5. Prediction (`results/predictions/{system}/{split}_run{n}.jsonl`)
 
@@ -135,3 +138,110 @@ only on the prediction format above, never on how a system works internally.
 
 Every command that can load data has an `--allow-test` flag, off by default. Only the frozen
 Phase 4 test run uses it.
+
+## 9. LLM layer (Phase 2)
+
+### Creating a client
+
+```python
+from bmqa.llm.client import make_client, FakeLLMClient
+
+client = make_client(llm_cfg, run=1)  # real client chosen by llm_cfg["provider"]
+client = make_client(llm_cfg, run=1, dry_run=True)  # FakeLLMClient: no GPU, key or network
+client = FakeLLMClient()  # same, created directly (tests)
+```
+
+`llm_cfg` is the `llm:` block of a config (`configs/closed_book.yaml`). Phase 3 and 4 configs must
+copy this block unchanged (including `revision`), so every LLM system uses the same model.
+
+| Client | `provider` | What it does |
+|---|---|---|
+| `QwenClient` | `qwen` | `Qwen/Qwen2.5-7B-Instruct` with `transformers`, 4-bit NF4 quantization (`bitsandbytes`, float16 compute) on a GPU; greedy decoding (`do_sample=False`); the model's chat template is applied. Needs the `llm` extra and a CUDA GPU (a free Colab T4 works). **Needs no API key.** |
+| `FakeLLMClient` | (any, with `dry_run=True`) | Returns a fixed JSON `yes` answer (or a function of the prompt); records every prompt in `.prompts`; never touches the network; used by all tests and `--dry-run`. |
+| `AnthropicClient` | `anthropic` | Claude through the Anthropic SDK with structured JSON output. Implemented but not used in the reported results; needs `ANTHROPIC_API_KEY`. |
+
+Config keys read by `QwenClient`: `model`, `revision` (pin to an immutable Hugging Face commit; the
+default `main` is not reproducible) and `load_in_4bit` (default `true`); an optional `config_hash`
+key is also passed into the cache key if present. `max_tokens` is the maximum number of newly
+generated tokens.
+
+### Cache key
+
+`bmqa.llm.cache.cache_key(...)` is the SHA-256 of the canonical JSON (sorted keys, no spaces) of:
+
+| Field | Meaning |
+|---|---|
+| `model`, `effort`, `max_tokens`, `prompt` | the request |
+| `run` | repeat number: run 1, 2, 3 are independent calls; repeating the **same** run is a cache hit |
+| `provider` | added when given (`qwen`) |
+| `extra` | added when given: for Qwen `revision`, `quantization` (4-bit flag, `nf4`, float16 compute), `generation` (`do_sample: false`, temperature 0) and, if present in the config, `config_hash` |
+
+So changing the model, revision, quantization, generation settings, prompt, `max_tokens`, run or
+provider gives a different key and a new generation. One JSON file per key is stored under
+`outputs/llm_cache/` (gitignored). To replay a finished run for free, repeat it with the **same**
+`--run` number (a different run number is a new generation).
+
+### Prompt (version `v1`) and evidence functions
+
+`build_prompt(question, docs, version="v1")` (`bmqa.llm.prompts`) builds one prompt from the
+question and the document texts only, so `long_answer` can never reach the model. All LLM systems
+use the same template; only the evidence block differs:
+
+| Evidence function | Module | Documents shown |
+|---|---|---|
+| `no_evidence(example)` | `bmqa.llm.run` | none: "No documents are provided. Answer from your own knowledge and set "citations" to []." (closed-book) |
+| `gold_evidence(example)` | `bmqa.llm.run` | one document `[1]` = the example's own abstract contexts joined by spaces, as `Hit(doc_id=example.id, score=1.0, rank=1)` (oracle) |
+
+```
+EvidenceFn = Callable[[Example], list[tuple[Hit, str]]]   # (hit, document text) pairs
+```
+
+Documents are numbered `[1]`, `[2]`, ... and PMIDs are never shown. Phase 3 supplies its own
+evidence function with the same type. Released prompt versions are never edited; a new version
+gets a new name (`v2`) and the dev results of every version tried are reported. Only `v1` exists.
+
+### Parsing answers
+
+The model replies in JSON with `answer` (`yes`/`no`/`maybe`), `rationale` and `citations` (document
+numbers). `parse_answer(text, n_docs) -> ParsedAnswer` (`bmqa.llm.parse`) accepts plain JSON, JSON in
+a Markdown fence, or the first `{...}` object, lower-cases and strips the answer, and returns:
+
+| Field | Meaning |
+|---|---|
+| `label` | `yes` / `no` / `maybe`, or `None` if no valid answer was found |
+| `rationale` | the explanation ("" if missing) |
+| `citations` | valid citation numbers, `1..n_docs` |
+| `invalid_citations` | numbers outside `1..n_docs` (including any citation when `n_docs = 0`): these are **fabricated citations**, counted in Phase 4 |
+
+Citations are not a separate prediction field: they stay inside `raw_output` and are recovered with
+`parse_answer(raw_output, n_docs=len(evidence))`.
+
+**Parse failures** (`label` is `None`, or the stop reason is `max_tokens`/`refusal`): `prediction` is
+the placeholder `"maybe"`, `raw_output` starts with `PARSE_FAILURE:` and `rationale` is `null`. The
+scorer counts such rows as wrong; they are never dropped.
+
+### `run_system` and the run command
+
+```python
+run_system(examples, client, evidence_fn, *, system, prompt_version, config_hash, run, max_tokens)
+    -> (list[Prediction], usage_dict)
+execute(cfg, evidence_fn, *, split, run, limit=None, dry_run=False, allow_test=False, ...)
+    -> (predictions_path, log_path)      # loads the split, runs, writes both files
+```
+
+`run_system` calls, for each example, the evidence function, `build_prompt`, `client.generate` and
+`parse_answer`, and returns the predictions in input order plus a usage summary. Retrieval needs no
+change to `run.py`: pass your own `evidence_fn`.
+
+```bash
+python -m bmqa.llm.run --config configs/closed_book.yaml --split dev --run 1 [--limit N] [--dry-run]
+python -m bmqa.llm.run --config configs/oracle.yaml --split dev --run 1
+```
+
+| Output | Path |
+|---|---|
+| Predictions | `results/predictions/{system}/{split}_run{n}.jsonl` |
+| Usage log | `results/runs/{system}_{split}_run{n}.json`: model, effort, prompt version, config hash, token totals, `cached_responses`, `uncached_*_tokens`, `parse_failures`, `stop_reasons`, `estimated_cost_usd`, start and end time |
+
+`--dry-run` uses `FakeLLMClient` and writes to `outputs/dry_run/` instead of `results/`.
+`--allow-test` is for the frozen Phase 4 run only.

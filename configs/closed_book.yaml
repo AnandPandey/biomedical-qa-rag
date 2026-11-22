@@ -1,0 +1,27 @@
+# Closed-book LLM baseline: the model answers from the question alone.
+# The `llm` block and `prompt_version` are shared by every LLM system (oracle, RAG): change them
+# only by agreement, in all configs at once.
+# Run it with: python -m bmqa.llm.run --config configs/closed_book.yaml --split dev --run 1
+# Name of the system; used in output file names and in every prediction row.
+system: closed_book
+# Which evidence function to use: "none" = no documents in the prompt (closed book).
+evidence: none
+# Version of the prompt template in bmqa/llm/prompts.py (must exist in TEMPLATES).
+prompt_version: v1
+# Settings for the language model; must be identical in all LLM configs for a fair comparison.
+llm:
+  # Which LLM service to call; "qwen" runs Qwen2.5-7B-Instruct with 4-bit quantization on Colab/GPU.
+  provider: qwen
+  model: Qwen/Qwen2.5-7B-Instruct
+  # Reasoning effort (unused for Qwen, kept for consistency).
+  effort: none
+  # Maximum length of one reply in tokens; a reply cut off at this limit is a parse failure.
+  max_tokens: 512
+  # 4-bit NormalFloat4 quantization via bitsandbytes to fit on a free T4 GPU (15 GB VRAM).
+  load_in_4bit: true
+  # Immutable Hugging Face commit of Qwen2.5-7B-Instruct used for every reported run.
+  revision: a09a35458c702b33eeacc393d103063234e8bc28
+price_per_million_tokens:   # list prices used only for the cost estimate in results/runs/
+  # Zero-cost open-weights model hosted on free GPU compute.
+  input: 0.00
+  output: 0.00
