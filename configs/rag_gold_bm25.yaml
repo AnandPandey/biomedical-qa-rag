@@ -1,0 +1,38 @@
+# RAG, gold-in-corpus: BM25 over the strict corpus plus the 1,000 PQA-L articles, so a question's
+# own abstract may be retrieved. `prompt_version`, `llm` and the prices are copied unchanged from
+# configs/closed_book.yaml (tests/test_rag.py checks this).
+# Why the llm block must match closed_book.yaml: then the only difference between the two
+# systems is the retrieved evidence, so any change in accuracy is caused by retrieval.
+# system: the system name; results are saved in a folder with this name.
+# (A --k override renames it, e.g. rag_gold_k3, so ablation runs never overwrite it.)
+system: rag_gold
+# retriever: how documents are found for each question.
+retriever:
+  # type: which retriever to use; bmqa.rag.run only supports bm25.
+  type: bm25
+  # corpus: the document file used to look up full texts (built by bmqa.retrieval.corpus).
+  corpus: data/corpus/gold.jsonl
+  # index_dir: the BM25 index folder built from that corpus (by bmqa.retrieval.bm25).
+  index_dir: outputs/indexes/bm25_gold
+# k: how many retrieved abstracts are put into the prompt for each question.
+# It must be the same as in the strict config so the two systems differ only in the corpus.
+k: 5   # must equal k in rag_strict_bm25.yaml
+# prompt_version: which prompt template to use (must match closed_book.yaml).
+prompt_version: v1
+# Settings for the language model; must be identical in all LLM configs for a fair comparison.
+llm:
+  # Which LLM service to call; "qwen" runs Qwen2.5-7B-Instruct with 4-bit quantization on Colab/GPU.
+  provider: qwen
+  model: Qwen/Qwen2.5-7B-Instruct
+  # Reasoning effort (unused for Qwen, kept for consistency).
+  effort: none
+  # Maximum length of one reply in tokens; a reply cut off at this limit is a parse failure.
+  max_tokens: 512
+  # 4-bit NormalFloat4 quantization via bitsandbytes to fit on a free T4 GPU (15 GB VRAM).
+  load_in_4bit: true
+  # Immutable Hugging Face commit of Qwen2.5-7B-Instruct used for every reported run.
+  revision: a09a35458c702b33eeacc393d103063234e8bc28
+price_per_million_tokens:   # list prices used only for the cost estimate in results/runs/
+  # Zero-cost open-weights model hosted on free GPU compute.
+  input: 0.00
+  output: 0.00
