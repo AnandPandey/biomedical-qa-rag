@@ -1,0 +1,13 @@
+# NLI model used to check whether rationale sentences are supported by a premise.
+# Label names are read from the model's config (cross-encoder/nli-deberta-v3-base:
+# 0 = contradiction, 1 = entailment, 2 = neutral).
+# This file is read by bmqa.eval.claims and bmqa.eval.annotate (option --config).
+
+# Hugging Face model id of the NLI cross-encoder: it reads (premise, claim) together and
+# outputs probabilities for contradiction / entailment / neutral.
+model: cross-encoder/nli-deberta-v3-base
+# Maximum number of tokens for one (premise, claim) pair; longer premises are cut short.
+max_length: 512
+# How many (premise, claim) pairs are sent to the model at once (lower it if memory runs out).
+batch_size: 16
+min_words: 4    # rationale sentences with fewer words are not treated as claims
