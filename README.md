@@ -15,6 +15,40 @@ than answering from memory alone? How do both compare with a fine-tuned biomedic
 > with a dev ablation over the number of retrieved abstracts k (final k = 1). Merging Phase 3
 > freezes all systems for the Phase 4 test run.
 > The official test set is protected and loaded only once in the frozen Phase 4 test run.
+> Phase 4 (frozen test run, statistics, claim analysis, report) is partly done: run 1 of the
+> majority baseline and of the four LLM systems was run on the test set at tag
+> `v1.0-test-results`. The classifier was not run on the test set and runs 2 and 3 were not done;
+> see the results section below and `report/sections/04-evaluation.md`.
+
+### Results on the official test set (n = 500, run 1 of each system)
+
+| System | Accuracy | Macro-F1 | Macro-F1 95 % CI |
+|---|---|---|---|
+| Majority | 0.552 | 0.237 | [0.225, 0.248] |
+| Closed-book LLM | 0.214 | 0.180 | [0.152, 0.210] |
+| RAG strict | 0.198 | 0.203 | [0.167, 0.238] |
+| RAG gold | 0.510 | 0.452 | [0.412, 0.493] |
+| Oracle LLM | 0.588 | 0.503 | [0.462, 0.543] |
+
+Not available: the PubMedBERT classifier on the test set (checkpoints were not available) and
+the second and third run of each LLM system, so no mean ± std is reported. RAG strict is not
+distinguishable from closed-book (Δ macro-F1 +0.022, 95 % CI [-0.020, +0.064], McNemar
+p = 0.54). RAG gold retrieves the question's own article at rank 1 for 363 of 500 questions.
+Full tables: [results/tables/main_results.md](results/tables/main_results.md),
+[significance](results/tables/significance.md) and
+[hallucination](results/tables/hallucination.md). The claim analysis used an NLI checker whose
+agreement with our labels was low (kappa 0.133), and those labels came from an AI assistant, not
+human annotators (`results/annotation/PROVENANCE.md`); treat the hallucination numbers as
+unreliable. Every command of the test run, with incidents, is in
+[results/test_run_log.md](results/test_run_log.md).
+
+Regenerate the tables and figures (no API calls needed):
+
+```bash
+python -m pip install -e ".[report]"
+python -m bmqa.data.download && python -m bmqa.data.splits
+python -m bmqa.eval.compare --split test --allow-test
+```
 
 ### Results so far (development set, 100 questions)
 

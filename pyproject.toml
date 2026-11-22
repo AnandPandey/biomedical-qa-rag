@@ -43,6 +43,10 @@ retrieval = [
     "bm25s>=0.3",
     "PyStemmer>=3.0",
 ]
+# Phase 4: figures for the final report (not installed in CI).
+report = [
+    "matplotlib>=3.8",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
