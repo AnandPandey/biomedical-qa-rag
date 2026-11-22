@@ -1,0 +1,13 @@
+{
+  "questions": "train+dev",
+  "gold_corpus": {
+    "recall@1": 0.696,
+    "recall@3": 0.812,
+    "recall@5": 0.862,
+    "recall@10": 0.904,
+    "recall@20": 0.936,
+    "mrr@20": 0.7679039893113422,
+    "n": 500
+  },
+  "strict_corpus_pqal_retrieved_top20": 0
+}

@@ -11,6 +11,9 @@ than answering from memory alone? How do both compare with a fine-tuned biomedic
 > merged with development-set results. Phase 2 (shared LLM layer, prompts, parser, and
 > closed-book/oracle runner infrastructure) is implemented and verified offline (63/63 tests pass), with dev results for Qwen2.5-7B-Instruct
 > (4-bit, pinned commit) run on a Google Colab T4 GPU.
+> Phase 3 adds the strict and gold retrieval corpora, a BM25 retriever and the two RAG systems,
+> with a dev ablation over the number of retrieved abstracts k (final k = 1). Merging Phase 3
+> freezes all systems for the Phase 4 test run.
 > The official test set is protected and loaded only once in the frozen Phase 4 test run.
 
 ### Results so far (development set, 100 questions)
@@ -21,11 +24,15 @@ than answering from memory alone? How do both compare with a fine-tuned biomedic
 | PubMedBERT classifier (Phase 1, mean ± std over 5 seeds) | 0.576 ± 0.049 | 0.395 ± 0.048 | Merged |
 | Closed-book LLM (`Qwen2.5-7B-Instruct`, dev run 1) | 0.260 | 0.235 | Dev run 1, prompt v1, 0 parse failures |
 | Oracle LLM (`Qwen2.5-7B-Instruct`, dev run 1) | 0.540 | 0.444 | Dev run 1, prompt v1, 0 parse failures |
+| RAG strict (BM25, k = 1, own article removed) | 0.210 | 0.211 | Dev run 1, prompt v1, 0 parse failures |
+| RAG gold (BM25, k = 1, own article may be retrieved) | 0.430 | 0.370 | Dev run 1, prompt v1, 0 parse failures |
 
 The classifier's dev scores are optimistic because dev was used to pick the best epoch. It
 almost never predicts "maybe". See `report/sections/01-data-and-classifier.md`.
 Closed-book Qwen answers "maybe" for 75% of dev questions and falls below the majority baseline; see
-`report/sections/02-llm-baselines.md`. Results are one run on 100 questions.
+`report/sections/02-llm-baselines.md`. Strict RAG does not beat closed-book on dev; gold-corpus RAG
+does, because BM25 finds the question's own abstract for 72 of 100 dev questions at k = 1. See
+`report/sections/03-retrieval-and-rag.md`. Results are one run on 100 questions.
 
 ## Team
 
@@ -108,6 +115,8 @@ Optional extras, installed only when needed (CI installs only `dev`):
 |---|---|
 | `classifier` | Training or running the PubMedBERT classifier (PyTorch, Transformers) |
 | `llm` | Calling Anthropic Claude API or running Qwen locally/Colab (`anthropic>=2.12`, `transformers>=4.40`, `torch>=2.2`, `accelerate>=0.28`, `bitsandbytes>=0.43`) |
+| `corpus` | Building the retrieval corpus from Hugging Face (`datasets`) |
+| `retrieval` | BM25 retrieval (`bm25s`, `PyStemmer`); also installed in CI so the BM25 tests run |
 
 Run standard code verification checks:
 
@@ -205,6 +214,38 @@ To execute live closed-book and oracle baselines with `Qwen2.5-7B-Instruct` (4-b
 !python -m bmqa.eval --pred results/predictions/closed_book/dev_run1.jsonl --split dev
 !python -m bmqa.eval --pred results/predictions/oracle/dev_run1.jsonl --split dev
 ```
+
+## Reproducing Phase 3 (development set)
+
+Build the corpora and indexes (CPU is enough; the corpus files are about 370 MB each and are
+gitignored):
+
+```bash
+python -m pip install -e ".[dev,corpus,retrieval]"
+python -m bmqa.data.download && python -m bmqa.data.splits
+python -m bmqa.retrieval.corpus                      # data/corpus/{strict,gold}.jsonl + results/corpus_stats.json
+python -m bmqa.retrieval.bm25 --corpus data/corpus/strict.jsonl --index-dir outputs/indexes/bm25_strict
+python -m bmqa.retrieval.bm25 --corpus data/corpus/gold.jsonl --index-dir outputs/indexes/bm25_gold
+python -m bmqa.retrieval.evaluate                    # results/retrieval/bm25_gold_traindev.json
+python -m bmqa.rag.run --config configs/rag_strict_bm25.yaml --split dev --run 1 --dry-run  # free
+```
+
+`git diff results/corpus_stats.json` must be empty after a rebuild (same SHA-256 values).
+
+The RAG runs use Qwen on a GPU (Colab T4). Before running there, keep JAX off the GPU and load the
+model fully on GPU 0; see "Running RAG with Qwen on a Colab T4 GPU" in
+[docs/interfaces.md](docs/interfaces.md):
+
+```bash
+export JAX_PLATFORMS=cpu XLA_PYTHON_CLIENT_PREALLOCATE=false
+python -m bmqa.rag.run --config configs/rag_strict_bm25.yaml --split dev --run 1 --k 3   # ablation run
+python -m bmqa.rag.run --config configs/rag_strict_bm25.yaml --split dev --run 1         # final (k from config)
+python -m bmqa.rag.run --config configs/rag_gold_bm25.yaml --split dev --run 1
+python -m bmqa.eval --pred results/predictions/rag_strict/dev_run1.jsonl --split dev
+```
+
+The dev ablation used k in {1, 3, 5, 10} for both corpora; k = 1 was chosen by the rule posted on
+issue #9 before the ablation.
 
 ## Repository layout
 

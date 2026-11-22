@@ -245,3 +245,56 @@ python -m bmqa.llm.run --config configs/oracle.yaml --split dev --run 1
 
 `--dry-run` uses `FakeLLMClient` and writes to `outputs/dry_run/` instead of `results/`.
 `--allow-test` is for the frozen Phase 4 run only.
+
+## 10. Retrieval and RAG (Phase 3)
+
+| Name | Module | Purpose |
+|---|---|---|
+| `build_corpora(pqa_a_rows, pqa_u_rows, pqal)` | `bmqa.retrieval.corpus` | Strict and gold corpora + statistics |
+| `DocStore(corpus_path)[doc_id] -> str` | `bmqa.retrieval.store` | Document text by ID |
+| `BM25Retriever(index_dir)` | `bmqa.retrieval.bm25` | Implements the `Retriever` protocol (section 3) |
+| `build_index(corpus_path, index_dir)` | `bmqa.retrieval.bm25` | BM25 index (`bm25s`, English stop words, Snowball stemmer) |
+| `retrieval_metrics(ranks)`, `evaluate_gold(...)`, `leakage_count(...)` | `bmqa.retrieval.evaluate` | Recall@k, MRR, leakage check |
+| `make_retrieval_evidence(retriever, store, k) -> EvidenceFn` | `bmqa.rag.evidence` | Retrieval evidence for the Phase 2 runner (query = question text) |
+
+- **Corpora** (`data/corpus/`, gitignored, rebuilt by command): `strict.jsonl` = PQA-A + PQA-U
+  minus all 1,000 PQA-L articles; `gold.jsonl` = strict + PQA-L. One `CorpusDoc` per line,
+  sorted by `doc_id`; text = abstract contexts without the conclusion; `title` is empty.
+  Source: Hugging Face `qiaojin/PubMedQA`, revision `9001f2853fb87cab8d220904e0de81ac6973b318`.
+  Sizes and SHA-256 values are committed in `results/corpus_stats.json`.
+- **Indexes** (`outputs/indexes/bm25_strict`, `outputs/indexes/bm25_gold`) are rebuilt from the
+  corpora and never committed; `doc_ids.json` maps index positions to PMIDs.
+- **System names:** `rag_strict`, `rag_gold`; dev ablation runs with `--k K` are named
+  `rag_strict_kK` / `rag_gold_kK` and never overwrite the final systems.
+- **Final k = 1** for both RAG configs, chosen on dev by the rule fixed before the ablation
+  (issue #9): the k in {1, 3, 5, 10} with the highest `rag_strict` macro-F1; ties go to the
+  smaller k; the same k for `rag_gold`.
+- The RAG configs reuse `prompt_version`, `llm` and the prices of `configs/closed_book.yaml`
+  unchanged (tested in `tests/test_rag.py`). `bmqa.rag.run` calls Phase 2's `execute` unchanged.
+
+Commands:
+
+```bash
+python -m bmqa.retrieval.corpus
+python -m bmqa.retrieval.bm25 --corpus data/corpus/strict.jsonl --index-dir outputs/indexes/bm25_strict
+python -m bmqa.retrieval.bm25 --corpus data/corpus/gold.jsonl --index-dir outputs/indexes/bm25_gold
+python -m bmqa.retrieval.evaluate
+python -m bmqa.rag.run --config configs/rag_strict_bm25.yaml --split dev --run 1 [--k K] [--limit N] [--dry-run]
+```
+
+### Running RAG with Qwen on a Colab T4 GPU
+
+Two environment issues appear only when BM25 and Qwen run in the same process on Colab:
+
+- `bm25s` uses JAX when it is installed (Colab preinstalls it), and JAX reserves about 75% of the
+  GPU memory at start-up, so the 4-bit Qwen model no longer fits. Set
+  `JAX_PLATFORMS=cpu` (and `XLA_PYTHON_CLIENT_PREALLOCATE=false`) before running.
+- `QwenClient` uses `device_map="auto"`; Phase 3 loaded the model with `device_map={"": 0}`
+  (the whole model on GPU 0). `make_client` does not read `device_map` from the config yet, so
+  Phase 3 used a small Colab-only wrapper that sets this default before calling
+  `bmqa.rag.run.main`. `device_map` is not part of the cache key, so answers are unaffected.
+
+Phase 3 dev runs used `torch 2.6.0`, `transformers 4.51.3`, `bitsandbytes 0.45.5` and
+`accelerate 1.6.0` (installed while debugging, before the JAX cause was found; Colab's defaults at
+the time, `torch 2.14` / `transformers 5.22`, were not retested with the JAX fix). Phase 4 should
+run every LLM system in one environment with fixed versions.

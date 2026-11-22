@@ -1,0 +1,20 @@
+{
+  "pqa_a": {
+    "rows_read": 211269,
+    "pqal_removed": 0,
+    "duplicates_removed": 0
+  },
+  "pqa_u": {
+    "rows_read": 61249,
+    "pqal_removed": 0,
+    "duplicates_removed": 0
+  },
+  "strict_size": 272518,
+  "gold_size": 273518,
+  "pqal_in_strict": 0,
+  "pqal_in_gold": 1000,
+  "strict_sha256": "4b18bc0748fca7831e074b54cecaaf62d83a8736eab933b061d8a2917122d979",
+  "gold_sha256": "13c9a93c8b235c03f49be60376ec50677b9f2257a9e53c1f71ee75c913b98605",
+  "hf_dataset": "qiaojin/PubMedQA",
+  "hf_revision": "9001f2853fb87cab8d220904e0de81ac6973b318"
+}
