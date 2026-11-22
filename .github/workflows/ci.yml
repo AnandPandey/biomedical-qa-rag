@@ -1,35 +1,67 @@
+# GitHub Actions workflow: GitHub runs these steps automatically on its own servers.
+# name: the workflow name shown in the GitHub "Actions" tab.
 name: CI
 
+# on: which events start the workflow.
 on:
+  # push: run when commits are pushed ...
   push:
+    # branches: ... but only to the main branch.
     branches: [main]
+  # pull_request: also run for every pull request, so problems show up before merging.
   pull_request:
 
+# permissions: the workflow may only read the repository (safer: it cannot change anything).
 permissions:
+  # contents: read-only access to the code.
   contents: read
 
+# concurrency: avoid running several CI jobs for the same branch at once.
 concurrency:
+  # group: runs with the same group name (here one per branch/PR) are grouped together.
   group: ci-${{ github.ref }}
+  # cancel-in-progress: a new push cancels the older, now outdated run.
   cancel-in-progress: true
 
 # Lint and unit tests only. No secrets, datasets, GPUs or network calls beyond installing
 # the dev tools from PyPI.
+# jobs: the list of jobs to run.
 jobs:
+  # checks: our single job (the name is our choice).
   checks:
+    # runs-on: the type of virtual machine GitHub provides (latest Ubuntu Linux).
     runs-on: ubuntu-latest
+    # timeout-minutes: stop the job if it takes longer than 10 minutes (e.g. if it hangs).
     timeout-minutes: 10
+    # steps: the commands run one after another; if one fails, the job fails.
     steps:
+      # Download the repository's code onto the virtual machine.
       - uses: actions/checkout@v4
+      # Install Python.
       - uses: actions/setup-python@v5
+        # with: settings passed to the setup-python action.
         with:
+          # python-version: the Python version to install.
           python-version: "3.12"
+          # cache: reuse downloaded pip packages between runs to make CI faster.
           cache: pip
+          # cache-dependency-path: the cache is refreshed when pyproject.toml changes.
           cache-dependency-path: pyproject.toml
-      - name: Install package and dev tools
-        run: python -m pip install -e ".[dev]"
+      # name: label shown in the GitHub log for this step.
+      - name: Install package, dev tools and the BM25 retriever
+        # run: shell command. Installs our package in editable mode (-e) with the "dev"
+        # extra (ruff, pytest) and the "retrieval" extra (bm25s, PyStemmer), so the BM25
+        # tests run instead of being skipped.
+        run: python -m pip install -e ".[dev,retrieval]"
+      # Lint step: ruff looks for code problems and style errors.
       - name: Lint
+        # run: check every Python file in the repository.
         run: ruff check .
+      # Format step: checks the code is formatted the agreed way.
       - name: Format
+        # run: --check only reports files that would change; it does not edit them.
         run: ruff format --check .
+      # Test step: runs all unit tests.
       - name: Tests
+        # run: pytest finds and runs every test_*.py file under tests/.
         run: pytest

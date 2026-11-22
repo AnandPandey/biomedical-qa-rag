@@ -34,6 +34,15 @@ llm = [
     "accelerate>=0.28",
     "bitsandbytes>=0.43",
 ]
+# Phase 3: building the retrieval corpus from Hugging Face (not installed in CI).
+corpus = [
+    "datasets>=2.19",
+]
+# Phase 3: BM25 retrieval (light; installed in CI so the retriever tests run).
+retrieval = [
+    "bm25s>=0.3",
+    "PyStemmer>=3.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
