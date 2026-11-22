@@ -70,6 +70,10 @@ backed up to Drive by `save()` and these events came after the last backup or we
 4. During `rag_strict` run 1 on Kaggle the notebook output showed `Error displaying widget: model not found`
    and a BM25 `Split strings 0%` progress bar for a long time. This was a display problem only: the GPU was at
    ~98% utilisation, and the cell finished normally without being re-run.
+   Correction to the NOTE at line 47: counted directly from the `evidence` field of the predictions, the
+   question's own article is the rank-1 document for 363 of 500 rag_gold questions (0 of 500 for rag_strict);
+   364 of 500 rag_gold answers have a raw_output identical to the oracle's (one of them with a different
+   retrieved document). The explanation of the cache hits is unchanged.
 5. Run times (UTC, from this log): closed_book ~36 min, oracle ~44 min, rag_strict ~44 min; rag_gold took ~1 min
    because 498 of 500 prompts were already in the cache (see the NOTE at line 47).
 6. Not done: the classifier (5 seeds) on the test set, because the five checkpoints were not available, and

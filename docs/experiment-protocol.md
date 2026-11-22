@@ -64,3 +64,24 @@ in the report rather than quietly re-running.
   3 times; report mean ± std. All raw outputs are cached and kept.
 - Every number in the report must be reproducible from a committed config with a documented
   command. No hand-edited results.
+
+## Record of the freeze and test run
+
+- Freeze tag `v1.0-test-results` on commit `e860c15` (the Phase 3 merge commit), 2026-11-22.
+  **Deviation:** the tag was first created on `1695851` (the Phase 0 close-out, which contains none of
+  the Phase 1-3 code) and was deleted and re-created on `e860c15` before any test prediction was
+  made. No test prediction exists that predates the corrected tag.
+- Test run carried out by Guman Singh Rajpoot on 2026-11-22 (Google Colab and Kaggle, T4 GPUs);
+  every command, machine and incident is in `results/test_run_log.md`.
+- The pre-declared analysis plan was posted on the Phase 4 issue before any test prediction:
+  <https://github.com/AnandPandey/biomedical-qa-rag/issues/3#issuecomment-7066870888>.
+- Frozen code and configs: `git diff v1.0-test-results -- src/bmqa/data src/bmqa/classifier
+  src/bmqa/llm src/bmqa/retrieval src/bmqa/rag` and the six system configs is empty.
+- Deviations from this protocol and from the pre-declared plan:
+  - The classifier was not run on the test set (checkpoints not available) and runs 2 and 3 of the
+    LLM systems were not done, so there is one run per system and no mean ± std.
+  - The fourth pre-declared comparison (classifier vs rag_strict) was not made; Holm correction
+    was applied over the three comparisons that exist.
+  - The claim-checker validation on dev used labels produced by an AI assistant (two passes and an
+    adjudication run), not two human annotators (`results/annotation/PROVENANCE.md`).
+  - The LLM runs were made in two sessions after a Colab GPU limit was reached; see the log.
