@@ -9,8 +9,8 @@ than answering from memory alone? How do both compare with a fine-tuned biomedic
 
 > **Status:** Phase 1 (data pipeline, scorer, majority baseline and PubMedBERT classifier) is
 > merged with development-set results. Phase 2 (shared LLM layer, prompts, parser, and
-> closed-book/oracle runner infrastructure) is implemented and verified offline (62/62 tests pass).
-> Live LLM baseline results on the development set are executing on Google Colab T4 GPU (Qwen2.5-7B-Instruct).
+> closed-book/oracle runner infrastructure) is implemented and verified offline (63/63 tests pass), with dev results for Qwen2.5-7B-Instruct
+> (4-bit, pinned commit) run on a Google Colab T4 GPU.
 > The official test set is protected and loaded only once in the frozen Phase 4 test run.
 
 ### Results so far (development set, 100 questions)
@@ -19,12 +19,13 @@ than answering from memory alone? How do both compare with a fine-tuned biomedic
 |---|---|---|---|
 | Majority (Phase 1) | 0.550 | 0.237 | Merged |
 | PubMedBERT classifier (Phase 1, mean ± std over 5 seeds) | 0.576 ± 0.049 | 0.395 ± 0.048 | Merged |
-| Closed-book LLM (`Qwen2.5-7B-Instruct`, dev run 1) | *Pending Colab run* | *Pending Colab run* | Infrastructure verified; running on Colab T4 |
-| Oracle LLM (`Qwen2.5-7B-Instruct`, dev run 1) | *Pending Colab run* | *Pending Colab run* | Infrastructure verified; running on Colab T4 |
+| Closed-book LLM (`Qwen2.5-7B-Instruct`, dev run 1) | 0.260 | 0.235 | Dev run 1, prompt v1, 0 parse failures |
+| Oracle LLM (`Qwen2.5-7B-Instruct`, dev run 1) | 0.540 | 0.444 | Dev run 1, prompt v1, 0 parse failures |
 
 The classifier's dev scores are optimistic because dev was used to pick the best epoch. It
 almost never predicts "maybe". See `report/sections/01-data-and-classifier.md`.
-Live Phase 2 baseline metrics will be reported once Colab GPU execution is completed.
+Closed-book Qwen answers "maybe" for 75% of dev questions and falls below the majority baseline; see
+`report/sections/02-llm-baselines.md`. Results are one run on 100 questions.
 
 ## Team
 
