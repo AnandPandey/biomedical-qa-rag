@@ -1,0 +1,82 @@
+{
+  "closed_book_run1": {
+    "system": "closed_book",
+    "run": 1,
+    "nli_model": "cross-encoder/nli-deberta-v3-base",
+    "answers": 500,
+    "parse_failures": 0,
+    "claims": 894,
+    "claims_per_answer": 1.788,
+    "evidence_grounded": null,
+    "gold_grounded": {
+      "supported": 0.06040268456375839,
+      "contradicted": 0.1040268456375839,
+      "not_supported": 0.8355704697986577
+    },
+    "answers_with_claim_not_supported_by_gold": 0.984,
+    "answers_with_fabricated_citation": 0.0
+  },
+  "oracle_run1": {
+    "system": "oracle",
+    "run": 1,
+    "nli_model": "cross-encoder/nli-deberta-v3-base",
+    "answers": 500,
+    "parse_failures": 0,
+    "claims": 883,
+    "claims_per_answer": 1.766,
+    "evidence_grounded": {
+      "supported": 0.2955832389580974,
+      "contradicted": 0.06795016987542468,
+      "not_supported": 0.636466591166478
+    },
+    "gold_grounded": {
+      "supported": 0.3159682899207248,
+      "contradicted": 0.08833522083805209,
+      "not_supported": 0.5956964892412231
+    },
+    "answers_with_claim_not_supported_by_gold": 0.85,
+    "answers_with_fabricated_citation": 0.0
+  },
+  "rag_strict_run1": {
+    "system": "rag_strict",
+    "run": 1,
+    "nli_model": "cross-encoder/nli-deberta-v3-base",
+    "answers": 500,
+    "parse_failures": 0,
+    "claims": 1014,
+    "claims_per_answer": 2.028,
+    "evidence_grounded": {
+      "supported": 0.14694280078895464,
+      "contradicted": 0.14595660749506903,
+      "not_supported": 0.7071005917159763
+    },
+    "gold_grounded": {
+      "supported": 0.022682445759368838,
+      "contradicted": 0.5522682445759369,
+      "not_supported": 0.4250493096646943
+    },
+    "answers_with_claim_not_supported_by_gold": 0.99,
+    "answers_with_fabricated_citation": 0.002
+  },
+  "rag_gold_run1": {
+    "system": "rag_gold",
+    "run": 1,
+    "nli_model": "cross-encoder/nli-deberta-v3-base",
+    "answers": 500,
+    "parse_failures": 0,
+    "claims": 909,
+    "claims_per_answer": 1.818,
+    "evidence_grounded": {
+      "supported": 0.2585258525852585,
+      "contradicted": 0.08800880088008801,
+      "not_supported": 0.6534653465346535
+    },
+    "gold_grounded": {
+      "supported": 0.24642464246424642,
+      "contradicted": 0.19581958195819582,
+      "not_supported": 0.5577557755775577
+    },
+    "answers_with_claim_not_supported_by_gold": 0.87,
+    "answers_with_fabricated_citation": 0.002
+  }
+}
