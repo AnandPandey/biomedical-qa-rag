@@ -167,26 +167,31 @@ class AnthropicClient:
 class QwenClient:
     """Qwen2.5-Instruct via transformers and PyTorch, with 4-bit quantization and a disk cache."""
 
-    # Inputs: model name, run number, cache folder, 4-bit quantization flag, and device mapping.
+    # Inputs: model name, revision, run number, cache folder, 4-bit flag, and device mapping.
     def __init__(
         self,
         model: str = "Qwen/Qwen2.5-7B-Instruct",
+        revision: str = "main",
         run: int = 1,
         cache_dir: str | Path = DEFAULT_CACHE_DIR,
         load_in_4bit: bool = True,
         device_map: str = "auto",
+        config_hash: str | None = None,
     ):
         # Lazy imports so environments without torch/transformers/bitsandbytes don't crash.
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         self.model = model
+        self.revision = revision
         self.run = run
+        self.load_in_4bit = load_in_4bit
+        self.config_hash = config_hash
         self.cache = ResponseCache(cache_dir)
         self.last_stop_reason: str | None = None
 
-        # Load the Hugging Face tokenizer.
-        self.tokenizer = AutoTokenizer.from_pretrained(model)
+        # Load the Hugging Face tokenizer with explicit revision.
+        self.tokenizer = AutoTokenizer.from_pretrained(model, revision=revision)
 
         # Configure 4-bit NormalFloat4 quantization if requested and CUDA is available.
         kwargs = {}
@@ -204,6 +209,7 @@ class QwenClient:
         if torch.cuda.is_available():
             self._model = AutoModelForCausalLM.from_pretrained(
                 model,
+                revision=revision,
                 torch_dtype=torch.float16,
                 **kwargs,
             )
@@ -211,18 +217,36 @@ class QwenClient:
             # Fallback for CPU / mocked testing environments.
             self._model = AutoModelForCausalLM.from_pretrained(
                 model,
+                revision=revision,
                 torch_dtype=torch.float32,
             )
 
     # Produce a reply for one prompt, using cache if present, otherwise running inference.
     def generate(self, prompt: str, *, max_tokens: int) -> LLMResponse:
-        # Cache key fingerprints the request.
+        # Cache key fingerprints request: provider, model, revision, generation, quantization.
+        extra = {
+            "revision": self.revision,
+            "quantization": {
+                "load_in_4bit": self.load_in_4bit,
+                "bnb_4bit_quant_type": "nf4",
+                "bnb_4bit_compute_dtype": "float16",
+            },
+            "generation": {
+                "do_sample": False,
+                "temperature": 0.0,
+            },
+        }
+        if self.config_hash:
+            extra["config_hash"] = self.config_hash
+
         key = cache_key(
             model=self.model,
             effort="none",
             max_tokens=max_tokens,
             prompt=prompt,
             run=self.run,
+            provider="qwen",
+            extra=extra,
         )
         record = self.cache.get(key)
         cached = record is not None
@@ -300,9 +324,11 @@ def make_client(
     if provider == "qwen":
         return QwenClient(
             model=llm_cfg.get("model", "Qwen/Qwen2.5-7B-Instruct"),
+            revision=llm_cfg.get("revision", "main"),
             run=run,
             cache_dir=cache_dir,
             load_in_4bit=llm_cfg.get("load_in_4bit", True),
+            config_hash=llm_cfg.get("config_hash"),
         )
     # Any other provider name is a mistake in the config: fail loudly with a clear message.
     raise ValueError(f"unknown LLM provider {provider!r}")

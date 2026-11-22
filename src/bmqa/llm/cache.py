@@ -29,15 +29,29 @@ DEFAULT_CACHE_DIR = Path("outputs/llm_cache")
 # returns an old, wrong reply. `run` is included on purpose: run 1, 2 and 3 must be
 # independent samples of the model, so each run gets its own key (and its own API call),
 # while repeating the SAME run hits the cache and gives identical text for free.
-def cache_key(*, model: str, effort: str, max_tokens: int, prompt: str, run: int) -> str:
+def cache_key(
+    *,
+    model: str,
+    effort: str,
+    max_tokens: int,
+    prompt: str,
+    run: int,
+    provider: str | None = None,
+    extra: dict | None = None,
+) -> str:
     # Collect all the request settings in one dictionary.
     payload = {
-        "model": model,  # which Claude model answers
-        "effort": effort,  # how much reasoning effort the model spends (e.g. "low")
+        "model": model,  # which model answers
+        "effort": effort,  # how much reasoning effort the model spends (e.g. "low", "none")
         "max_tokens": max_tokens,  # upper limit on reply length
         "prompt": prompt,  # the exact text sent to the model
         "run": run,  # repetition number (1, 2, 3...)
     }
+    # Optional provider and extra configuration / quantization identity.
+    if provider is not None:
+        payload["provider"] = provider
+    if extra:
+        payload.update(extra)
     # Turn the dict into one canonical text form: sorted keys and no extra spaces mean the
     # same settings always give exactly the same text (and therefore the same hash).
     # ensure_ascii=False keeps non-English characters as they are instead of \u escapes.

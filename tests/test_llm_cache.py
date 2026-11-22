@@ -30,3 +30,17 @@ def test_put_and_get(tmp_path):
     cache.put(key, {"text": "hello é", "stop_reason": "end_turn"})
     # Reading it back must return exactly the same dict.
     assert cache.get(key) == {"text": "hello é", "stop_reason": "end_turn"}
+
+
+def test_cache_key_provider_and_extra_isolation():
+    # Base key with no provider/extra
+    key_base = cache_key(**ARGS, run=1)
+    # Key with provider
+    key_qwen = cache_key(**ARGS, run=1, provider="qwen")
+    # Key with quantization extra
+    key_4bit = cache_key(**ARGS, run=1, provider="qwen", extra={"load_in_4bit": True})
+    key_16bit = cache_key(**ARGS, run=1, provider="qwen", extra={"load_in_4bit": False})
+
+    assert key_base != key_qwen
+    assert key_qwen != key_4bit
+    assert key_4bit != key_16bit
