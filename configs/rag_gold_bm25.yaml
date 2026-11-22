@@ -16,7 +16,7 @@ retriever:
   index_dir: outputs/indexes/bm25_gold
 # k: how many retrieved abstracts are put into the prompt for each question.
 # It must be the same as in the strict config so the two systems differ only in the corpus.
-k: 5   # must equal k in rag_strict_bm25.yaml
+k: 1   # must equal k in rag_strict_bm25.yaml
 # prompt_version: which prompt template to use (must match closed_book.yaml).
 prompt_version: v1
 # Settings for the language model; must be identical in all LLM configs for a fair comparison.

@@ -1,0 +1,54 @@
+{
+  "system": "rag_gold_k5",
+  "split": "dev",
+  "run": 1,
+  "prediction_file": "results/predictions/rag_gold_k5/dev_run1.jsonl",
+  "n": 100,
+  "accuracy": 0.44,
+  "macro_f1": 0.3423779574722971,
+  "per_label": {
+    "yes": {
+      "precision": 0.72,
+      "recall": 0.6545454545454545,
+      "f1": 0.6857142857142857,
+      "support": 55
+    },
+    "no": {
+      "precision": 0.5,
+      "recall": 0.11764705882352941,
+      "f1": 0.19047619047619047,
+      "support": 34
+    },
+    "maybe": {
+      "precision": 0.09523809523809523,
+      "recall": 0.36363636363636365,
+      "f1": 0.1509433962264151,
+      "support": 11
+    }
+  },
+  "confusion_matrix": {
+    "labels": [
+      "yes",
+      "no",
+      "maybe"
+    ],
+    "rows_gold_cols_pred": [
+      [
+        36,
+        2,
+        17
+      ],
+      [
+        9,
+        4,
+        21
+      ],
+      [
+        5,
+        2,
+        4
+      ]
+    ]
+  },
+  "parse_failures": 0
+}

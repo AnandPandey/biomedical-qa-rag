@@ -15,7 +15,7 @@ retriever:
   # index_dir: the BM25 index folder built from that corpus (by bmqa.retrieval.bm25).
   index_dir: outputs/indexes/bm25_strict
 # k: how many retrieved abstracts are put into the prompt for each question.
-k: 5   # set from the dev ablation using the rule posted on the Phase 3 issue
+k: 1   # set from the dev ablation using the rule posted on the Phase 3 issue
 # prompt_version: which prompt template to use (must match closed_book.yaml).
 prompt_version: v1
 # Settings for the language model; must be identical in all LLM configs for a fair comparison.
