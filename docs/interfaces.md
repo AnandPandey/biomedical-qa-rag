@@ -111,7 +111,8 @@ Writes `results/metrics/{system}_{split}_run{n}.json` with `n`, `accuracy`, `mac
 per-label precision/recall/F1/support, the confusion matrix (rows gold, columns predicted, label
 order yes/no/maybe) and `parse_failures`. The predicted IDs must be exactly the split's IDs.
 Macro-F1 matches scikit-learn's `f1_score(average="macro")` used by the official PubMedQA
-script. Confidence intervals and significance tests are added in Phase 4. The evaluator depends
+script. Confidence intervals, significance tests and comparison tables are in
+`bmqa.eval.stats` and `bmqa.eval.compare` (section 11). The evaluator depends
 only on the prediction format above, never on how a system works internally.
 
 ## 7. Python helpers (Phase 1)
@@ -298,3 +299,33 @@ Phase 3 dev runs used `torch 2.6.0`, `transformers 4.51.3`, `bitsandbytes 0.45.5
 `accelerate 1.6.0` (installed while debugging, before the JAX cause was found; Colab's defaults at
 the time, `torch 2.14` / `transformers 5.22`, were not retested with the JAX fix). Phase 4 should
 run every LLM system in one environment with fixed versions.
+
+## 11. Evaluation and analysis (Phase 4)
+
+| Name | Module | Purpose |
+|---|---|---|
+| `bootstrap_ci(gold, pred, metric, n_boot=10000, seed=0)` | `bmqa.eval.stats` | 95 % percentile bootstrap CI |
+| `paired_bootstrap(gold, pred_a, pred_b, metric, ...)` | `bmqa.eval.stats` | Difference A - B and its CI |
+| `mcnemar_exact(correct_a, correct_b) -> (b, c, p)` | `bmqa.eval.stats` | Exact two-sided McNemar test |
+| `holm(p_values)`, `cohen_kappa(a, b)` | `bmqa.eval.stats` | Multiple-comparison correction, agreement |
+| `split_claims`, `decide`, `check_claims`, `summarize`, `fabricated_citations` | `bmqa.eval.claims` | Unsupported claims and fabricated citations |
+| `stratified_sample`, `label_report` | `bmqa.eval.annotate` | Human validation of the claim checker on dev |
+| `aggregate`, `load_metrics` | `bmqa.eval.compare` | Result tables across runs and seeds |
+
+- **Claim labels:** `supported`, `contradicted`, `not_supported`. A claim is supported if the
+  NLI model's most likely label is entailment for any premise; otherwise contradicted if it is
+  contradiction for any premise; otherwise not supported. Premises: the documents shown
+  (*evidence-grounded*; none for closed-book) and the example's own abstract sections
+  (*gold-grounded*; all systems).
+- **Outputs:** `results/claims/{system}_{split}_run{n}.jsonl` (one row per claim),
+  `results/claims/summary_{split}.json`, `results/annotation/*`, `results/tables/*`,
+  `results/figures/*`.
+
+Commands:
+
+```bash
+python -m bmqa.eval.annotate sample --strict-corpus data/corpus/strict.jsonl --gold-corpus data/corpus/gold.jsonl
+python -m bmqa.eval.annotate agreement
+python -m bmqa.eval.claims --pred results/predictions/rag_strict/test_run1.jsonl --split test --allow-test --corpus data/corpus/strict.jsonl
+python -m bmqa.eval.compare --split test --allow-test
+```
