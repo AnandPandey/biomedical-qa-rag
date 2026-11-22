@@ -25,6 +25,15 @@ classifier = [
     "transformers>=4.40",
     "numpy>=1.26",
 ]
+# Phase 2: LLM providers and utilities (never installed in CI; tests use a fake client or mocks).
+llm = [
+    "anthropic>=2.12",
+    "python-dotenv>=1.0",
+    "torch>=2.2",
+    "transformers>=4.40",
+    "accelerate>=0.28",
+    "bitsandbytes>=0.43",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
