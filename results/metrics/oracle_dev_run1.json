@@ -1,0 +1,54 @@
+{
+  "system": "oracle",
+  "split": "dev",
+  "run": 1,
+  "prediction_file": "results/predictions/oracle/dev_run1.jsonl",
+  "n": 100,
+  "accuracy": 0.54,
+  "macro_f1": 0.443532590341101,
+  "per_label": {
+    "yes": {
+      "precision": 0.82,
+      "recall": 0.7454545454545455,
+      "f1": 0.780952380952381,
+      "support": 55
+    },
+    "no": {
+      "precision": 0.6923076923076923,
+      "recall": 0.2647058823529412,
+      "f1": 0.3829787234042553,
+      "support": 34
+    },
+    "maybe": {
+      "precision": 0.10810810810810811,
+      "recall": 0.36363636363636365,
+      "f1": 0.16666666666666669,
+      "support": 11
+    }
+  },
+  "confusion_matrix": {
+    "labels": [
+      "yes",
+      "no",
+      "maybe"
+    ],
+    "rows_gold_cols_pred": [
+      [
+        41,
+        2,
+        12
+      ],
+      [
+        4,
+        9,
+        21
+      ],
+      [
+        5,
+        2,
+        4
+      ]
+    ]
+  },
+  "parse_failures": 0
+}
