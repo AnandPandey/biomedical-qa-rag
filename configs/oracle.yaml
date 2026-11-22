@@ -18,6 +18,8 @@ llm:
   max_tokens: 512
   # 4-bit NormalFloat4 quantization via bitsandbytes to fit on a free T4 GPU (15 GB VRAM).
   load_in_4bit: true
+  # Immutable Hugging Face commit of Qwen2.5-7B-Instruct used for every reported run.
+  revision: a09a35458c702b33eeacc393d103063234e8bc28
 price_per_million_tokens:   # list prices used only for the cost estimate in results/runs/
   # Zero-cost open-weights model hosted on free GPU compute.
   input: 0.00
