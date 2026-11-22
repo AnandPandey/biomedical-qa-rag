@@ -29,5 +29,20 @@ python -m bmqa.data.splits      # -> data/processed/{train,dev,test}.jsonl
 | dev | 100 | 55 | 34 | 11 |
 | test | 500 | 276 | 169 | 55 |
 
+## Retrieval corpus (PQA-A and PQA-U)
+
+Built from the Hugging Face dataset `qiaojin/PubMedQA` (MIT license), configs `pqa_artificial`
+(211,269 rows) and `pqa_unlabeled` (61,249 rows), pinned to revision
+`9001f2853fb87cab8d220904e0de81ac6973b318`.
+
+```bash
+python -m bmqa.retrieval.corpus    # -> data/corpus/strict.jsonl, data/corpus/gold.jsonl
+```
+
+- `strict.jsonl`: PQA-A + PQA-U minus every PQA-L article, de-duplicated by PMID.
+- `gold.jsonl`: `strict.jsonl` plus the 1,000 PQA-L articles.
+- Text = abstract contexts without the conclusion. Files are sorted by PMID, so their SHA-256
+  values (in `results/corpus_stats.json`) are reproducible.
+
 Read [docs/experiment-protocol.md](../docs/experiment-protocol.md) before working with the
 test split: it is loaded only in the frozen Phase 4 test run.
