@@ -1,0 +1,54 @@
+{
+  "system": "majority",
+  "split": "test",
+  "run": 1,
+  "prediction_file": "results/predictions/majority/test_run1.jsonl",
+  "n": 500,
+  "accuracy": 0.552,
+  "macro_f1": 0.2371134020618557,
+  "per_label": {
+    "yes": {
+      "precision": 0.552,
+      "recall": 1.0,
+      "f1": 0.711340206185567,
+      "support": 276
+    },
+    "no": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 169
+    },
+    "maybe": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 55
+    }
+  },
+  "confusion_matrix": {
+    "labels": [
+      "yes",
+      "no",
+      "maybe"
+    ],
+    "rows_gold_cols_pred": [
+      [
+        276,
+        0,
+        0
+      ],
+      [
+        169,
+        0,
+        0
+      ],
+      [
+        55,
+        0,
+        0
+      ]
+    ]
+  },
+  "parse_failures": 0
+}

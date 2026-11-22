@@ -1,0 +1,24 @@
+{
+  "system": "rag_gold",
+  "split": "test",
+  "run": 1,
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "effort": "none",
+  "prompt_version": "v1",
+  "config_hash": "d88f1e9fabd5",
+  "dry_run": false,
+  "limit": null,
+  "started": "2026-11-22T20:22:41+00:00",
+  "finished": "2026-11-22T20:23:10+00:00",
+  "n": 500,
+  "input_tokens": 212552,
+  "output_tokens": 37440,
+  "cached_responses": 498,
+  "uncached_input_tokens": 793,
+  "uncached_output_tokens": 170,
+  "parse_failures": 0,
+  "stop_reasons": {
+    "end_turn": 500
+  },
+  "estimated_cost_usd": 0.0
+}

@@ -1,0 +1,24 @@
+{
+  "system": "closed_book",
+  "split": "test",
+  "run": 1,
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "effort": "none",
+  "prompt_version": "v1",
+  "config_hash": "10aea289ffde",
+  "dry_run": false,
+  "limit": null,
+  "started": "2026-11-22T17:03:23+00:00",
+  "finished": "2026-11-22T17:03:24+00:00",
+  "n": 500,
+  "input_tokens": 61851,
+  "output_tokens": 35155,
+  "cached_responses": 500,
+  "uncached_input_tokens": 0,
+  "uncached_output_tokens": 0,
+  "parse_failures": 0,
+  "stop_reasons": {
+    "end_turn": 500
+  },
+  "estimated_cost_usd": 0.0
+}
